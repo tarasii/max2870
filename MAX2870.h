@@ -18,7 +18,7 @@
     MAX2870 MAX2870(PIN_LE, PIN_CE, PIN_LD);
     MAX2870.powerOn(true);
     MAX2870.setPFD(MAX2870_reference_frequency_mhz, MAX2870_R_divider);
-    MAX2870.set_RF_OUT_A(1200); 
+    MAX2870.set_RF_OUT_A(1200); // 1.2 GHz
   }
   @endcode
 */
