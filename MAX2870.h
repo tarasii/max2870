@@ -12,58 +12,17 @@
   phase noise and spurious performance.
 
   @code
-  #include "mbed.h"
-  #include <stdio.h>
 
   #include "MAX2870.h"
 
-  SPI         spi(D11,D12,D13);           //mosi, miso, sclk
-  Serial      pc(USBTX,USBRX,9600);       //tx, rx, baud
-
-  DigitalOut  le(D10,1);                  //latch enable
-  DigitalOut  ce(D9,1);                   //chip enable
-
-
-  int main() {
-    float freq_entry;                   //frequency input to terminal
-    float freq_actual;                  //frequency based on MAX2870 settings
-    float freq_pfd;                     //frequency of phase frequency detector
-    float pll_coefficient;              //fractional-N coefficient (N + F/M)
-    float vco_divisor;                  //divisor from f_vco to f_rfouta
-    char buffer[256];                   //string input from terminal
-
-    spi.format(8,0);                    //CPOL = CPHA = 0, 8 bits per frame
-    spi.frequency(1000000);             //1 MHz SPI clock
-
-    MAX2870 MAX2870(spi,D10);           //create object of class MAX2870
-
-    //The routine in the while(1) loop will ask the user to input a desired
-    //output frequency, calculate the corresponding register settings, update
-    //the MAX2870 registers, and then independently use the programmed values
-    //from the registers to re-calculate the output frequency chosen
-    while(1){
-        pc.printf("\n\rEnter a frequency in MHz:");
-        fgets(buffer,256,stdin);        //store entry as string until newline entered
-        freq_entry = atof (buffer);     //convert string to a float
-        MAX2870.frequency(freq_entry);  //update MAX2870 registers for new frequency
-        MAX2870.readRegister6();        //read register 6 and update MAX2870.reg6
-
-        //Examples for how to calculate important operation parameters like
-        //PFD frequency and divisor ratios using members of the MAX2870 class
-        freq_pfd = MAX2870.f_reference*(1+MAX2870.reg2.bits.dbr)/(MAX2870.reg2.bits.r*(1+MAX2870.reg2.bits.rdiv2));
-        pll_coefficient = (MAX2870.reg0.bits.n+1.0*MAX2870.reg0.bits.frac/MAX2870.reg1.bits.m);
-        vco_divisor = powf(2,MAX2870.reg4.bits.diva);
-
-        //calculate expected f_RFOUTA based on the register settings
-        freq_actual = freq_pfd*pll_coefficient/vco_divisor;
-        pc.printf("\n\rTarget: %.3f MHz\tActual: %.3f MHz",freq_entry,freq_actual);
-        pc.printf("\n\rDie: %d, VCO: %d, F_PFD: %f",MAX2870.reg6.bits.die,MAX2870.reg6.bits.v,freq_pfd);
-        pc.printf("\n\rN: %d, F: %d, M: %d, N+F/M: %f",MAX2870.reg0.bits.n,MAX2870.reg0.bits.frac,MAX2870.reg1.bits.m,pll_coefficient);
-    }
-
+  void setup() {
+    MAX2870 MAX2870(PIN_LE, PIN_CE, PIN_LD);
+    MAX2870.powerOn(true);
+    MAX2870.setPFD(MAX2870_reference_frequency_mhz, MAX2870_R_divider);
+    MAX2870.set_RF_OUT_A(1200); 
   }
 
-  @endcode
+@endcode
 */
 class MAX2870 {
   public:
