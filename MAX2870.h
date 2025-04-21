@@ -12,7 +12,6 @@
   phase noise and spurious performance.
 
   @code
-
   #include "MAX2870.h"
 
   void setup() {
@@ -21,8 +20,7 @@
     MAX2870.setPFD(MAX2870_reference_frequency_mhz, MAX2870_R_divider);
     MAX2870.set_RF_OUT_A(1200); 
   }
-
-@endcode
+  @endcode
 */
 class MAX2870 {
   public:
